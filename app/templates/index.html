@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malware Database AI Search</title>
+    <meta name="description" content="Extract structured query parameters from natural language for Malware Database.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .meta-chips {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── Animated background ─────────────────────────────────────────── -->
+    <div class="bg-orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>Malware DB <span class="arrow">→</span> AI Search</h1>
+            </div>
+            <p class="subtitle">Structured query extraction for file scanning</p>
+        </div>
+    </header>
+
+    <!-- ── Main content ────────────────────────────────────────────────── -->
+    <main class="main">
+
+        <!-- Input panel -->
+        <section class="panel panel-input" id="input-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">💬</span>
+                    <h2>Natural Language Query</h2>
+                </div>
+                <div class="model-badge" id="model-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-label">AI</span>
+                    <span class="badge-model" id="badge-model-name">Local</span>
+                </div>
+            </div>
+
+            <div class="textarea-wrap">
+                <textarea id="input-text" placeholder="e.g. Find all clean .exe files from the last 7 days"
+                    spellcheck="false"></textarea>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="extract-btn" type="button" onclick="submitQuery()">
+                    <span class="btn-text">Extract JSON</span>
+                    <span class="btn-loader" id="btn-loader" aria-hidden="true">
+                        <span class="spinner"></span>
+                        Extracting…
+                    </span>
+                </button>
+                <button class="btn btn-ghost" id="clear-btn" type="button"
+                    onclick="document.getElementById('input-text').value=''">Clear</button>
+            </div>
+
+            <!-- Example chips -->
+            <div class="examples-section">
+                <p class="examples-label">Try an example:</p>
+                <div class="examples-chips" id="examples-chips">
+                    <span class="chip"
+                        onclick="fillExample('Get me all the clean .dll files from the last 14 days, max 20 results.')">En
+                        1</span>
+                    <span class="chip" onclick="fillExample('Show me .zip files with status 4 and yara match.')">En
+                        2</span>
+                    <span class="chip"
+                        onclick="fillExample('فایل‌های اجرایی (.exe) بدافزار که توسط یارا تطبیق (match) داده شده‌اند رو برام بیار. نهایتاً ۵ تا از ۱۰ روز پیش.')">Fa
+                        1</span>
+                    <span class="chip" onclick="fillExample('تمام .pdf ها با استاتوس دو رو نمایش بده')">Fa 2</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output panel -->
+        <section class="panel panel-output" id="output-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">💻</span>
+                    <h2>Query Parameters JSON</h2>
+                </div>
+                <div class="output-actions">
+                    <button class="btn-icon" id="copy-btn" title="Copy JSON" onclick="copyJson()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span class="copy-label" id="copy-label">Copy</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div class="output-empty" id="output-empty">
+                <div class="empty-icon">🔍</div>
+                <p>Your structured query will appear here</p>
+                <span>Type a request on the left and click <strong>Extract JSON</strong></span>
+            </div>
+
+            <!-- Error state -->
+            <div class="output-error hidden" id="output-error">
+                <div class="error-icon">⚠️</div>
+                <p class="error-title">Extraction Failed</p>
+                <p class="error-message" id="error-message"
+                    style="white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto;"></p>
+            </div>
+
+            <!-- JSON output -->
+            <div class="output-json hidden" id="output-json">
+                <pre class="json-pre"><code id="json-code"></code></pre>
+            </div>
+        </section>
+
+        <!-- Data Table panel -->
+        <section class="panel panel-output hidden" id="data-panel" style="margin-top: 1.5rem;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">🗄️</span>
+                    <h2>Database Results</h2>
+                </div>
+            </div>
+            <div class="table-container" style="overflow-x: auto; padding: 1rem;">
+                <table id="results-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead id="results-head" style="border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
+                    </thead>
+                    <tbody id="results-body">
+                    </tbody>
+                </table>
+                <div id="results-empty" class="hidden" style="text-align: center; padding: 2rem; color: #a1a1aa;">
+                    No records found.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <style>
+        #results-table th,
+        #results-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        #results-table th {
+            color: #a1a1aa;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+    </style>
+
+    <script>
+        function fillExample(text) {
+            document.getElementById('input-text').value = text;
+        }
+
+        async function submitQuery() {
+            const input = document.getElementById('input-text').value;
+            const btn = document.getElementById('extract-btn');
+            const loader = document.getElementById('btn-loader');
+
+            const emptyState = document.getElementById('output-empty');
+            const errorState = document.getElementById('output-error');
+            const jsonState = document.getElementById('output-json');
+            const dataPanel = document.getElementById('data-panel');
+
+            const jsonCode = document.getElementById('json-code');
+            const errorMsg = document.getElementById('error-message');
+
+            const rHead = document.getElementById('results-head');
+            const rBody = document.getElementById('results-body');
+            const rEmpty = document.getElementById('results-empty');
+
+            if (!input.trim()) {
+                return;
+            }
+
+            // UI feedback
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            emptyState.classList.add('hidden');
+            errorState.classList.add('hidden');
+            jsonState.classList.add('hidden');
+            dataPanel.classList.add('hidden');
+
+            rHead.innerHTML = '';
+            rBody.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: input })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    jsonCode.textContent = JSON.stringify(data.payload, null, 4);
+                    jsonState.classList.remove('hidden');
+
+                    // Render table if we have db_results
+                    if (data.db_results) {
+                        dataPanel.classList.remove('hidden');
+                        if (data.db_results.length === 0) {
+                            rEmpty.classList.remove('hidden');
+                            document.getElementById('results-table').classList.add('hidden');
+                        } else {
+                            rEmpty.classList.add('hidden');
+                            document.getElementById('results-table').classList.remove('hidden');
+
+                            // Create headers
+                            const keys = Object.keys(data.db_results[0]);
+                            const trHead = document.createElement('tr');
+                            keys.forEach(k => {
+                                const th = document.createElement('th');
+                                th.textContent = k;
+                                trHead.appendChild(th);
+                            });
+                            rHead.appendChild(trHead);
+
+                            // Create rows
+                            data.db_results.forEach(row => {
+                                const tr = document.createElement('tr');
+                                keys.forEach(k => {
+                                    const td = document.createElement('td');
+                                    td.textContent = row[k] !== null ? row[k] : 'null';
+                                    tr.appendChild(td);
+                                });
+                                rBody.appendChild(tr);
+                            });
+                        }
+                    }
+
+                } else {
+                    errorMsg.textContent = data.error || "Unknown error occurred.";
+                    errorState.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorState.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        }
+
+        function copyJson() {
+            const code = document.getElementById('json-code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const label = document.getElementById('copy-label');
+                label.textContent = "Copied!";
+                setTimeout(() => label.textContent = "Copy", 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
