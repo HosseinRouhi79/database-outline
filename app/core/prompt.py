@@ -4,6 +4,11 @@ def build_prompt(user_text: str) -> str:
     return f"""You are an AI assistant that extracts user intent for an antivirus management platform.
 Your task is to map the user's natural language request to the structured QueryIntent JSON.
 
+# Aggregation / Grouping Rule:
+If the user asks to categorize, group, or show counts by a specific attribute (e.g., "count files separated by extension" or "تعداد فایل هارا به تفکیک پسوندشان به من بگو"):
+1. Set "query_type" to "group".
+2. Set "group_by_column" to the exact database column name you are grouping by (e.g., "extension", "is_online", "status", "yara_scan_status").
+
 # Instructions
 - Understand Persian (Farsi) input perfectly.
 - Output strictly in the defined JSON format.

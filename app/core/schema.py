@@ -8,9 +8,14 @@ class QueryIntent(BaseModel):
         description="The target table to query based on the user's intent. If unrelated or greeting, use 'unknown'."
     )
     
-    query_type: Literal["list", "count"] = Field(
+    query_type: Literal["list", "count", "group"] = Field(
         default="list",
-        description="Whether the user wants a list of records ('list') or just the total count of records ('count')"
+        description="Whether the user wants a list of records ('list'), a total count ('count'), or an aggregated count grouped by a column ('group')"
+    )
+    
+    group_by_column: Optional[str] = Field(
+        default=None, 
+        description="The database column name to group by if query_type is 'group'. For example, if grouping by extension, use 'extension'. If by status, use 'status', etc."
     )
 
     # ── File filters ──

@@ -79,6 +79,8 @@
                 <p class="examples-label">Try an example:</p>
                 <div class="examples-chips" id="examples-chips">
                     <span class="chip" onclick="fillExample('کاربری به اسم test1 وجود دارد؟')">مثال ۱</span>
+                    <span class="chip"
+                        onclick="fillExample('تعداد فایل ها در دیتابیس را به تفکیک پسوندشان به من بگو')">مثال ۲</span>
                 </div>
             </div>
         </section>
@@ -131,7 +133,8 @@
                     <h2>AI Response</h2>
                 </div>
             </div>
-            <div style="padding: 1rem; color: #e8eaf6; font-family: 'Inter', sans-serif; line-height: 1.6;" id="ai-response-text">
+            <div style="padding: 1rem; color: #e8eaf6; font-family: 'Inter', sans-serif; line-height: 1.6;"
+                id="ai-response-text">
             </div>
         </section>
 
@@ -210,7 +213,7 @@
             errorState.classList.add('hidden');
             jsonState.classList.add('hidden');
             dataPanel.classList.add('hidden');
-            if(aiPanel) aiPanel.classList.add('hidden');
+            if (aiPanel) aiPanel.classList.add('hidden');
 
             rHead.innerHTML = '';
             rBody.innerHTML = '';
