@@ -17,6 +17,7 @@
             margin-bottom: 1rem;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -77,15 +78,7 @@
             <div class="examples-section">
                 <p class="examples-label">Try an example:</p>
                 <div class="examples-chips" id="examples-chips">
-                    <span class="chip"
-                        onclick="fillExample('Get me all the clean .dll files from the last 14 days, max 20 results.')">En
-                        1</span>
-                    <span class="chip" onclick="fillExample('Show me .zip files with status 4 and yara match.')">En
-                        2</span>
-                    <span class="chip"
-                        onclick="fillExample('فایل‌های اجرایی (.exe) بدافزار که توسط یارا تطبیق (match) داده شده‌اند رو برام بیار. نهایتاً ۵ تا از ۱۰ روز پیش.')">Fa
-                        1</span>
-                    <span class="chip" onclick="fillExample('تمام .pdf ها با استاتوس دو رو نمایش بده')">Fa 2</span>
+                    <span class="chip" onclick="fillExample('کاربری به اسم test1 وجود دارد؟')">مثال ۱</span>
                 </div>
             </div>
         </section>
@@ -127,6 +120,18 @@
             <!-- JSON output -->
             <div class="output-json hidden" id="output-json">
                 <pre class="json-pre"><code id="json-code"></code></pre>
+            </div>
+        </section>
+
+        <!-- AI Response panel -->
+        <section class="panel panel-output hidden" id="ai-panel" style="margin-top: 1.5rem; grid-column: 1 / -1;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">🤖</span>
+                    <h2>AI Response</h2>
+                </div>
+            </div>
+            <div style="padding: 1rem; color: #e8eaf6; font-family: 'Inter', sans-serif; line-height: 1.6;" id="ai-response-text">
             </div>
         </section>
 
@@ -183,6 +188,8 @@
             const errorState = document.getElementById('output-error');
             const jsonState = document.getElementById('output-json');
             const dataPanel = document.getElementById('data-panel');
+            const aiPanel = document.getElementById('ai-panel');
+            const aiText = document.getElementById('ai-response-text');
 
             const jsonCode = document.getElementById('json-code');
             const errorMsg = document.getElementById('error-message');
@@ -203,6 +210,7 @@
             errorState.classList.add('hidden');
             jsonState.classList.add('hidden');
             dataPanel.classList.add('hidden');
+            if(aiPanel) aiPanel.classList.add('hidden');
 
             rHead.innerHTML = '';
             rBody.innerHTML = '';
@@ -221,6 +229,11 @@
                 if (data.success) {
                     jsonCode.textContent = JSON.stringify(data.payload, null, 4);
                     jsonState.classList.remove('hidden');
+
+                    if (data.llm_response) {
+                        aiPanel.classList.remove('hidden');
+                        aiText.innerHTML = marked.parse(data.llm_response);
+                    }
 
                     // Render table if we have db_results
                     if (data.db_results) {

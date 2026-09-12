@@ -31,10 +31,31 @@ def api_query():
         except Exception as go_err:
             print(f"Error calling Go service: {go_err}")
 
+        # Generate final LLM response
+        llm_response_text = ""
+        try:
+            import ollama
+            import json
+            final_prompt = f"""شما یک دستیار هوشمند پایگاه داده هستید. کاربر سوال زیر را پرسیده است: '{text}'
+شما در دیتابیس جستجو کردید و اطلاعات خام زیر را دریافت کردید (به فرمت JSON):
+{json.dumps(db_results, ensure_ascii=False)}
+
+وظیفه شما این است که بر اساس اطلاعات دیتابیس، به سوال کاربر به زبان **فارسی** و به شکل طبیعی پاسخ دهید.
+پاسخ باید کوتاه، مفید و خوانا باشد.
+اگر لیست خالی است، به کاربر بگویید که هیچ رکوردی یافت نشد."""
+            
+            host_url = Config.OLLAMA_URL.replace("/v1", "").replace("/v1/", "")
+            client = ollama.Client(host=host_url)
+            resp = client.generate(model=Config.MODEL_NAME, prompt=final_prompt)
+            llm_response_text = resp['response']
+        except Exception as llm_err:
+            print(f"Error generating LLM response: {llm_err}")
+
         return jsonify({
             "success": True,
             "payload": payload_dict,
-            "db_results": db_results
+            "db_results": db_results,
+            "llm_response": llm_response_text
         })
     except Exception as e:
         traceback.print_exc()

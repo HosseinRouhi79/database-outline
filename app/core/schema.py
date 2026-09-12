@@ -17,6 +17,7 @@ class QueryIntent(BaseModel):
     extension: Optional[Literal[".exe", ".dll", ".msi", ".com", ".vsixpackage", ".docx", ".png", ".bat", ".jpg", ".rar", ".deb", ".pdf", ".flatpak", ".csv", ".zip", ".text"]] = Field(default=None, description="File extension filter, e.g. '.exe', '.dll', '.pdf'. Only for target_table='files'.")
     yara_scan_status: Optional[Literal["not_scanned", "match", "clean"]] = Field(default=None, description="Yara scan status filter. Only for target_table='files'.")
     file_status: Optional[int] = Field(default=None, description="File processing status code (2, 3, or 4). Only for target_table='files'.")
+    file_name_search: Optional[str] = Field(default=None, description="Search for a specific file name using partial pattern matching. Only for target_table='files'.")
 
     # ── Antivirus filters ──
     is_enable: Optional[bool] = Field(default=None, description="Whether the antivirus is enabled. Only for target_table='antivirus'.")
@@ -27,6 +28,7 @@ class QueryIntent(BaseModel):
     is_active: Optional[bool] = Field(default=None, description="Whether the user is active. Only for target_table='users'.")
     is_online: Optional[bool] = Field(default=None, description="Whether the user is currently online. Only for target_table='users'.")
     must_change_password: Optional[bool] = Field(default=None, description="Whether the user must change password. Only for target_table='users'.")
+    user_name_search: Optional[str] = Field(default=None, description="Search for a specific user name using partial pattern matching. Only for target_table='users'.")
 
     # ── Task filters ──
     task_status: Optional[int] = Field(default=None, description="Task status code. Only for target_table='tasks'.")

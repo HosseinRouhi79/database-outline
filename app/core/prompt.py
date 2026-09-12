@@ -11,6 +11,8 @@ Your task is to map the user's natural language request to the structured QueryI
 
 # Field Mapping Hints
 - If the user specifies an extension (like .exe, .pdf, .dll), YOU MUST set the `extension` field.
+- If the user mentions a specific file name or partial name to search for, YOU MUST set the `file_name_search` field.
+- If the user mentions a specific user name or partial name to search for, YOU MUST set the `user_name_search` field.
 - For files, set target_table='files'. For tasks, set 'tasks'. For users, set 'users'. For yara, set 'yara_rules'. For antivirus, set 'antivirus'.
 - Set ONLY the filters belonging to the selected target_table. Leave all other filters as null.
 - Set `timeframe_days` ONLY if a time period is explicitly mentioned (e.g. "ماه گذشته", "last 7 days"). Otherwise leave it null.
