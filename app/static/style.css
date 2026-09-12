@@ -212,6 +212,7 @@ a:hover { color: var(--accent-hover); }
     gap: 1.25rem;
     transition: border-color var(--transition), box-shadow var(--transition);
     min-height: 520px;
+    min-width: 0;
 }
 
 .panel:hover {
@@ -577,6 +578,14 @@ a:hover { color: var(--accent-hover); }
     font-family: var(--font-mono);
 }
 
+.output-json {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    flex: 1;
+}
+
 .json-pre {
     flex: 1;
     background: rgba(8, 10, 24, 0.6);
@@ -584,6 +593,7 @@ a:hover { color: var(--accent-hover); }
     border-radius: var(--radius-md);
     padding: 1.25rem;
     overflow: auto;
+    max-width: 100%;
     animation: fade-in 0.4s var(--ease-out);
 }
 
@@ -592,7 +602,8 @@ a:hover { color: var(--accent-hover); }
     font-size: 0.82rem;
     line-height: 1.8;
     color: var(--text-primary);
-    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 @keyframes fade-in {
