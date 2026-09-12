@@ -22,21 +22,27 @@ def api_query():
         
         # Forward to Go service
         db_results = []
-        try:
-            go_resp = requests.post(Config.GO_SERVICE_URL, json=payload_dict)
-            if go_resp.status_code == 200:
-                resp_json = go_resp.json()
-                if resp_json.get("success"):
-                    db_results = resp_json.get("data", [])
-        except Exception as go_err:
-            print(f"Error calling Go service: {go_err}")
+        if payload_dict.get("target_table") != "unknown":
+            try:
+                go_resp = requests.post(Config.GO_SERVICE_URL, json=payload_dict)
+                if go_resp.status_code == 200:
+                    resp_json = go_resp.json()
+                    if resp_json.get("success"):
+                        db_results = resp_json.get("data", [])
+            except Exception as go_err:
+                print(f"Error calling Go service: {go_err}")
 
         # Generate final LLM response
         llm_response_text = ""
         try:
             import ollama
             import json
-            final_prompt = f"""شما یک دستیار هوشمند پایگاه داده هستید. کاربر سوال زیر را پرسیده است: '{text}'
+            
+            if payload_dict.get("target_table") == "unknown":
+                final_prompt = f"""شما یک دستیار هوشمند هستید. کاربر پیام زیر را ارسال کرده است: '{text}'
+لطفاً به زبان فارسی، کوتاه و صمیمانه پاسخ دهید. به هیچ وجه درباره پایگاه داده یا جستجو صحبت نکنید."""
+            else:
+                final_prompt = f"""شما یک دستیار هوشمند پایگاه داده هستید. کاربر سوال زیر را پرسیده است: '{text}'
 شما در دیتابیس جستجو کردید و اطلاعات خام زیر را دریافت کردید (به فرمت JSON):
 {json.dumps(db_results, ensure_ascii=False)}
 

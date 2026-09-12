@@ -3,9 +3,9 @@ from typing import Optional, Literal
 
 class QueryIntent(BaseModel):
     """The master query intent combining the target table and its specific filters."""
-    target_table: Literal["files", "antivirus", "users", "tasks", "yara_rules"] = Field(
-        ..., 
-        description="The target table to query based on the user's intent."
+    target_table: Literal["files", "antivirus", "users", "tasks", "yara_rules", "unknown"] = Field(
+        default="unknown", 
+        description="The target table to query based on the user's intent. If unrelated or greeting, use 'unknown'."
     )
     
     query_type: Literal["list", "count"] = Field(
